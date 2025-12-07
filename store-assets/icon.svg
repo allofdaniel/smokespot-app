@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="50%" style="stop-color:#1E1B4B"/>
+      <stop offset="100%" style="stop-color:#0F172A"/>
+    </linearGradient>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5EEAD4"/>
+      <stop offset="100%" style="stop-color:#C084FC"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGradient)"/>
+
+  <!-- Aurora effect -->
+  <ellipse cx="128" cy="128" rx="200" ry="150" fill="#5EEAD4" opacity="0.15" filter="url(#glow)"/>
+  <ellipse cx="384" cy="384" rx="180" ry="120" fill="#C084FC" opacity="0.12" filter="url(#glow)"/>
+
+  <!-- Main circle -->
+  <circle cx="256" cy="256" r="140" fill="url(#iconGradient)" filter="url(#glow)"/>
+
+  <!-- Cigarette body -->
+  <rect x="150" y="230" width="170" height="52" rx="10" fill="white"/>
+
+  <!-- Cigarette filter -->
+  <rect x="150" y="230" width="50" height="52" rx="10" fill="#FFE4C4"/>
+  <rect x="180" y="230" width="20" height="52" fill="#FFE4C4"/>
+
+  <!-- Smoke wisps -->
+  <path d="M340 220 Q355 190 340 160 Q325 130 355 100"
+        fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.7"/>
+  <path d="M305 210 Q320 185 305 155 Q290 130 315 105"
+        fill="none" stroke="white" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <path d="M270 215 Q280 195 270 170"
+        fill="none" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Location pin -->
+  <path d="M256 350 L235 395 L256 380 L277 395 Z" fill="white"/>
+</svg>

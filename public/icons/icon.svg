@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5EEAD4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C084FC;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="smoke-gradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg-gradient)"/>
+
+  <!-- Glass effect overlay -->
+  <rect width="512" height="256" rx="96" fill="rgba(255,255,255,0.1)"/>
+
+  <!-- Cigarette icon -->
+  <g transform="translate(128, 180)">
+    <!-- Cigarette body -->
+    <rect x="20" y="80" width="200" height="40" rx="8" fill="#f5f5f5"/>
+    <rect x="180" y="80" width="40" height="40" rx="8" fill="#d97706"/>
+
+    <!-- Smoke waves -->
+    <path d="M 100 80 Q 110 50 100 30 Q 90 10 100 -20"
+          stroke="url(#smoke-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M 130 80 Q 140 45 130 20 Q 120 -5 130 -30"
+          stroke="url(#smoke-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M 160 80 Q 170 55 160 35 Q 150 15 160 -10"
+          stroke="url(#smoke-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Location pin accent -->
+  <circle cx="400" cy="380" r="40" fill="rgba(255,255,255,0.3)"/>
+  <circle cx="400" cy="380" r="20" fill="white"/>
+</svg>

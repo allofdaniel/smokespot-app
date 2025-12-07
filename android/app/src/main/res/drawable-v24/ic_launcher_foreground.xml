@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportHeight="108"
+    android:viewportWidth="108">
+
+    <!-- Main circle with gradient -->
+    <path android:pathData="M54,54m-28,0a28,28 0,1 1,56 0a28,28 0,1 1,-56 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="26"
+                android:startY="26"
+                android:endX="82"
+                android:endY="82">
+                <item android:offset="0.0" android:color="#FF5EEAD4"/>
+                <item android:offset="1.0" android:color="#FFC084FC"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Cigarette body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,58 L38,52 Q38,48 42,48 L68,48 Q72,48 72,52 L72,58 Q72,62 68,62 L42,62 Q38,62 38,58 Z"/>
+
+    <!-- Cigarette filter -->
+    <path
+        android:fillColor="#FFE4C4"
+        android:pathData="M38,58 L38,52 Q38,48 42,48 L48,48 L48,62 L42,62 Q38,62 38,58 Z"/>
+
+    <!-- Smoke wisps -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.6"
+        android:pathData="M70,46 Q72,42 70,38 Q68,34 72,30"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"/>
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"
+        android:pathData="M64,44 Q66,40 64,36 Q62,32 66,28"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+
+    <!-- Location pin indicator -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,70 L50,76 L54,74 L58,76 Z"/>
+
+</vector>

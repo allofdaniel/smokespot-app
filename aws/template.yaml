@@ -1,0 +1,294 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SmokeSpot App Backend - AWS Serverless Infrastructure
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues:
+      - dev
+      - prod
+  DeveloperEmail:
+    Type: String
+    Description: Email address for receiving spot submission notifications
+  SenderEmail:
+    Type: String
+    Description: Verified SES email for sending notifications
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        SPOTS_TABLE: !Ref SpotsTable
+        PENDING_TABLE: !Ref PendingSpotsTable
+        BUCKET_NAME: !Ref PhotosBucket
+        DEVELOPER_EMAIL: !Ref DeveloperEmail
+        FROM_EMAIL: !Ref SenderEmail
+
+Resources:
+  # ===== API Gateway =====
+  SmokeSpotApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub smokespot-api-${Environment}
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt UserPool.Arn
+
+  # ===== DynamoDB Tables =====
+  SpotsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub smoking-spots-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: type
+          AttributeType: S
+        - AttributeName: source
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: type-index
+          KeySchema:
+            - AttributeName: type
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: source-index
+          KeySchema:
+            - AttributeName: source
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  PendingSpotsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub smoking-spots-pending-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: status
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: status-index
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # ===== S3 Bucket for Photos =====
+  PhotosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub smokespot-photos-${Environment}-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+            AllowedOrigins:
+              - '*'
+            MaxAge: 3000
+
+  PhotosBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PhotosBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub ${PhotosBucket.Arn}/uploads/*
+
+  # ===== Cognito User Pool =====
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub smokespot-users-${Environment}
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+        - Name: name
+          Required: false
+          Mutable: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireUppercase: false
+          RequireSymbols: false
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub smokespot-client-${Environment}
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+        - Google
+      CallbackURLs:
+        - http://localhost:3000/callback
+        - https://smokespot.app/callback
+      LogoutURLs:
+        - http://localhost:3000
+        - https://smokespot.app
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+
+  # Google Identity Provider
+  GoogleIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      UserPoolId: !Ref UserPool
+      ProviderName: Google
+      ProviderType: Google
+      ProviderDetails:
+        client_id: '{{resolve:ssm:/smokespot/google-client-id}}'
+        client_secret: '{{resolve:ssm:/smokespot/google-client-secret}}'
+        authorize_scopes: 'email openid profile'
+      AttributeMapping:
+        email: email
+        name: name
+        username: sub
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub smokespot-auth-${Environment}-${AWS::AccountId}
+      UserPoolId: !Ref UserPool
+
+  # ===== Lambda Functions =====
+  GetSpotsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smokespot-get-spots-${Environment}
+      Handler: getSpots.handler
+      CodeUri: lambda/
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SpotsTable
+      Events:
+        GetSpots:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SmokeSpotApi
+            Path: /spots
+            Method: GET
+            Auth:
+              Authorizer: NONE
+
+  SubmitSpotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smokespot-submit-spot-${Environment}
+      Handler: submitSpot.handler
+      CodeUri: lambda/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PendingSpotsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+              Resource: '*'
+      Events:
+        SubmitSpot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SmokeSpotApi
+            Path: /spots
+            Method: POST
+
+  GetUploadUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smokespot-get-upload-url-${Environment}
+      Handler: getUploadUrl.handler
+      CodeUri: lambda/
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref PhotosBucket
+      Events:
+        GetUploadUrl:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SmokeSpotApi
+            Path: /upload-url
+            Method: POST
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${SmokeSpotApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref UserPool
+
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref UserPoolClient
+
+  UserPoolDomain:
+    Description: Cognito User Pool Domain
+    Value: !Sub smokespot-auth-${Environment}-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com
+
+  PhotosBucketName:
+    Description: S3 Bucket for photos
+    Value: !Ref PhotosBucket
+
+  SpotsTableName:
+    Description: DynamoDB table for approved spots
+    Value: !Ref SpotsTable
+
+  PendingSpotsTableName:
+    Description: DynamoDB table for pending spots
+    Value: !Ref PendingSpotsTable

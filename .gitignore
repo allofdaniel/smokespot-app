@@ -1,0 +1,81 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.local
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/*.iml
+android/.idea/
+android/local.properties
+
+# Android signing (DO NOT COMMIT)
+android/keystore.properties
+android/*.keystore
+android/*.jks
+*.keystore
+*.jks
+
+# iOS
+ios/Pods/
+ios/DerivedData/
+ios/*.xcworkspace
+ios/build/
+
+# Capacitor
+.capacitor/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# PWA
+sw.js.map
+
+# AWS
+.aws/
+aws/samconfig.toml
+aws/.aws-sam/
+
+# Vercel
+.vercel/
+
+# Sensitive files
+*.pem
+credentials.json
+secrets.json
