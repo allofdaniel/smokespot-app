@@ -79,3 +79,5 @@ aws/.aws-sam/
 *.pem
 credentials.json
 secrets.json
+.vercel
+.env*.local
