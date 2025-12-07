@@ -8,10 +8,10 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.smokespot.app"
+    namespace "com.allofdaniel.smokespot"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.smokespot.app"
+        applicationId "com.allofdaniel.smokespot"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

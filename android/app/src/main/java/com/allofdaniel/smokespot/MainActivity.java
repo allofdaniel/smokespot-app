@@ -1,4 +1,4 @@
-package com.smokespot.app;
+package com.allofdaniel.smokespot;
 
 import com.getcapacitor.BridgeActivity;
 
